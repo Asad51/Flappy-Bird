@@ -7,13 +7,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class FlappyBird extends ApplicationAdapter {
-	SpriteBatch batch;
-	Texture background;
-	Texture[] birds;
+	private final String TAG = "FLAPPY_BIRD";
 
-	int flapState;
-	int width, height;
-	int birdWidth, birdHeight;
+	private  SpriteBatch batch;
+	private Texture background;
+	private Texture[] birds;
+
+	private int flapState;
+	private float velocity;
+	private int gameState;
+	private float gravity;
+
+	private float width, height;
+	private float birdX, birdY;
 
 	@Override
 	public void create () {
@@ -24,19 +30,38 @@ public class FlappyBird extends ApplicationAdapter {
 		birds[1] = new Texture("bird2.png");
 
 		flapState = 0;
+		velocity = 0;
+		gameState = 0;
+		gravity = 2;
+
 		width = Gdx.graphics.getWidth();
 		height = Gdx.graphics.getHeight();
-		birdWidth = birds[0].getWidth();
-		birdHeight = birds[0].getHeight();
+		birdX = width / 2 - birds[0].getWidth() / 2;
+		birdY = height / 2 - birds[0].getHeight() / 2;
+		Gdx.app.log(TAG, "Width: " + width + ", Height: " + height + ", BirdX: " + birdX + ", BirdY: " + birdY);
 	}
 
 	@Override
 	public void render () {
+		if(Gdx.input.justTouched()){
+			gameState = 1;
+			velocity -= 30;
+		}
+
+		if(gameState != 0){
+			if((birdY > 0 || velocity < 0) && birdY < height) {
+				velocity += gravity;
+				birdY -= velocity;
+				birdY = Math.min(birdY, height - birds[0].getHeight());
+				birdY = Math.max(birdY, 0);
+			}
+		}
+
 		flapState = (flapState == 1) ? 0: 1;
 
 		batch.begin();
 		batch.draw(background, 0, 0, width, height);
-		batch.draw(birds[flapState], width / 2 - birdWidth / 2, height / 2 - birdHeight / 2);
+		batch.draw(birds[flapState], birdX, birdY);
 		batch.end();
 	}
 	
